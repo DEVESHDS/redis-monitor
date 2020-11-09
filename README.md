@@ -55,3 +55,5 @@ Nodejs/Express based Redis monitor
 <hr >
 <img src="docs/f.jpg">
 <hr >
+
+<p><b>Note:</b>As this was a Backend assignement front-end part of the code has been used from from the NetEaseGame/redis-monitor repository and the backend part has been ported from python,flask to Nodejs and expressjs</p>
