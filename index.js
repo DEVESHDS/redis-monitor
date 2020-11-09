@@ -31,27 +31,27 @@ app.set("view engine", "html");
 //   });
 // }
 
-async function test() {
-  try {
-    await init();
+// async function test() {
+//   try {
+//     await init();
 
-    // const redis_client = await RedisInfo.create({
-    //   md5: "789456",
-    //   host: "slaveserver",
-    //   port: 35,
-    //   password: "qwerty",
-    // });
+//     // const redis_client = await RedisInfo.create({
+//     //   md5: "789456",
+//     //   host: "slaveserver",
+//     //   port: 35,
+//     //   password: "qwerty",
+//     // });
 
-    // console.log(redis_client);
+//     // console.log(redis_client);
 
-    const redis_infos = await RedisInfo.findAll();
-    console.log("All Redis_Infos:", JSON.stringify(redis_infos, null, 2));
-  } catch (err) {
-    console.log("An error has Occured", err);
-  }
-}
+//     const redis_infos = await RedisInfo.findAll();
+//     console.log("All Redis_Infos:", JSON.stringify(redis_infos, null, 2));
+//   } catch (err) {
+//     console.log("An error has Occured", err);
+//   }
+// }
 
-test();
+// test();
 
 app.get("/", (req, res) => {
   res.render("index_page.html");
@@ -109,9 +109,9 @@ app.get("/api/redis_monitor", async (req, res) => {
     if (ele) {
       const startTime = Date.now();
       const client = redis.createClient({
-        host: "redis-13562.c82.us-east-1-2.ec2.cloud.redislabs.com",
-        port: 13562,
-        password: "1aqldeP6LgQWUaNjSqSV6JxDi5Jbgpr5",
+        host: ele[0].host,
+        port: ele[0].port,
+        password: ele[0].password,
       });
       client.on("ready", function () {
         console.log("ready");
@@ -174,23 +174,28 @@ app.post("/api/add", (req, res) => {
   let port = req.body.port;
   let password = req.body.password;
   let result = {};
+  let redis_client;
   const client = redis.createClient({
     host: host,
     port: port,
     password: password,
   });
   client.on("ready", async () => {
-    const redis_client = await RedisInfo.create({
-      md5: md5lib(host + port),
-      host: host,
-      port: port,
-      password: password,
-    });
-    console.log("redis client is added ", redis_client);
-    result.success = 1;
-    result.data = redis_client;
-    res.send(JSON.stringify(result));
-    client.quit();
+    try {
+      redis_client = await RedisInfo.create({
+        md5: md5lib(host + port),
+        host: host,
+        port: port,
+        password: password,
+      });
+      console.log("redis client is added ", redis_client);
+      result.success = 1;
+      result.data = redis_client;
+      res.send(JSON.stringify(result));
+      client.quit();
+    } catch (error) {
+      res.send(error);
+    }
   });
   client.once("error", () => {
     result.success = 0;
@@ -202,6 +207,23 @@ app.post("/api/add", (req, res) => {
     console.log("Other events are listened");
     client.quit();
   });
+});
+
+//Route for deleting a redis server
+app.post("/api/del", async (req, res) => {
+  let md5 = req.body.md5;
+  // console.log(md5);
+  let result = {};
+  try {
+    await RedisInfo.destroy({ where: { md5: md5 } });
+    result.success = 1;
+    result.data = "Success!";
+    res.send(JSON.stringify(result));
+  } catch (error) {
+    result.success = 0;
+    result.data = "Not Found!";
+    res.send(JSON.stringify(result));
+  }
 });
 
 app.listen(1234, () => {
