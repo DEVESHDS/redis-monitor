@@ -137,7 +137,7 @@ app.post("/api/add", (req, res) => {
   });
 
   client.once("error", () => {
-    res.send(utils.standardResponse(1, "Ping error!"));
+    res.send(utils.standardResponse(0, "Ping error!"));
     client.quit();
   });
 
