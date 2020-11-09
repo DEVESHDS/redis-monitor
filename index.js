@@ -6,7 +6,7 @@ const md5lib = require("md5");
 const { init, sequelize } = require("./database/db");
 const RedisInfo = require("./database/model");
 
-app.use(express.urlencoded());
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 app.use(express.static(__dirname + "/public"));
@@ -226,6 +226,39 @@ app.post("/api/del", async (req, res) => {
   }
 });
 
+//Api for flush db
+app.get("/api/redis/flushall", async (req, res) => {
+  console.log("flushall api has been called");
+  let md = req.query.md5;
+  let db = req.query.db;
+  let redis_client;
+  let result = {};
+  try {
+    redis_client = await RedisInfo.findOne({ where: { md5: md } });
+    console.log("Printing redis client", redis_client);
+    if (redis_client) {
+      const client = redis.createClient({
+        host: redis_client.host,
+        port: redis_client.port,
+        password: redis_client.password,
+      });
+      client.on("ready", () => {
+        console.log("server is ready to get flushed");
+        client.send_command("FLUSHDB", console.log);
+        result.success = 1;
+        result.data = "Success!";
+        res.send(JSON.stringify(result));
+      });
+    }
+  } catch (error) {
+    console.log("error in flush command", error);
+    result.success = 0;
+    result.data = "Not Found!";
+    res.send(JSON.stringify(result));
+  }
+});
+
 app.listen(1234, () => {
   console.log("App is listening");
+  init();
 });
