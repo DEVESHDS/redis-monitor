@@ -115,6 +115,31 @@ app.get("/api/redis_monitor", async (req, res) => {
   }
 });
 
+//Route for Ping
+app.get("/api/ping", async (req, res) => {
+  let host = req.query.host;
+  let port = req.query.port;
+  let password = req.query.password;
+  let result = {};
+  const client = redis.createClient({
+    host: host,
+    port: port,
+    password: password,
+  });
+  client.on("ready", () => {
+    console.log("Ping has been successfull");
+    result.success = 1;
+    result.data = "Ping success!";
+    res.send(JSON.stringify(result));
+  });
+  client.on("error", () => {
+    console.log("sorry,Cannot connect to server");
+    result.success = 0;
+    result.data = "ping error!";
+    res.send(JSON.stringify(result));
+  });
+});
+
 app.listen(1234, () => {
   console.log("App is listening");
 });
