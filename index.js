@@ -1,13 +1,35 @@
 const express = require("express");
+const md5 = require("md5");
 const app = express();
 const redis = require("redis");
-const { init } = require("./database/db");
+const md5lib = require("md5");
+const { init, sequelize } = require("./database/db");
 const RedisInfo = require("./database/model");
+
+app.use(express.urlencoded());
+app.use(express.json());
 
 app.use(express.static(__dirname + "/public"));
 app.set("views", __dirname + "/public/views");
 app.engine("html", require("ejs").renderFile);
 app.set("view engine", "html");
+
+// function ping(host, port, password) {
+//   let result = {};
+//   const client = redis.createClient({
+//     host: host,
+//     port: port,
+//     pssword: password,
+//   });
+//   client.on("ready", () => {
+//     result.success = 1;
+//     result.data = "Ping success!";
+//   });
+//   client.on('error',()=>{
+//     result.success=0;
+//     result.data="ping error!";
+//   });
+// }
 
 async function test() {
   try {
@@ -121,6 +143,7 @@ app.get("/api/ping", async (req, res) => {
   let port = req.query.port;
   let password = req.query.password;
   let result = {};
+  console.log("API Called");
   const client = redis.createClient({
     host: host,
     port: port,
@@ -130,13 +153,54 @@ app.get("/api/ping", async (req, res) => {
     console.log("Ping has been successfull");
     result.success = 1;
     result.data = "Ping success!";
+    client.quit();
     res.send(JSON.stringify(result));
   });
-  client.on("error", () => {
+  client.once("error", () => {
     console.log("sorry,Cannot connect to server");
     result.success = 0;
     result.data = "ping error!";
     res.send(JSON.stringify(result));
+  });
+  client.on("error", () => {
+    console.log("Second event has benn handled");
+  });
+});
+
+//route for add api
+
+app.post("/api/add", (req, res) => {
+  let host = req.body.host;
+  let port = req.body.port;
+  let password = req.body.password;
+  let result = {};
+  const client = redis.createClient({
+    host: host,
+    port: port,
+    password: password,
+  });
+  client.on("ready", async () => {
+    const redis_client = await RedisInfo.create({
+      md5: md5lib(host + port),
+      host: host,
+      port: port,
+      password: password,
+    });
+    console.log("redis client is added ", redis_client);
+    result.success = 1;
+    result.data = redis_client;
+    res.send(JSON.stringify(result));
+    client.quit();
+  });
+  client.once("error", () => {
+    result.success = 0;
+    result.data = "Ping error!";
+    res.send(JSON.stringify(result));
+    client.quit();
+  });
+  client.on("error", () => {
+    console.log("Other events are listened");
+    client.quit();
   });
 });
 
