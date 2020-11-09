@@ -1,5 +1,7 @@
 # redis-monitor
+
 Nodejs/Express based Redis monitor
+
 <h1>Redis-Monitor in Nodejs/Express</h1>
 <h2>Tech Stack</h2>
 <ul>
@@ -17,7 +19,7 @@ Nodejs/Express based Redis monitor
   <li>host : redis-13562.c82.us-east-1-2.ec2.cloud.redislabs.com </li>
   <li>port : 13562 </li>
   <li>password : 1aqldeP6LgQWUaNjSqSV6JxDi5Jbgpr5 </li>
-</ul>  
+</ul>
 
 <h3>To access project locally. Follow the following steps </h3>
 <p><b>Note</b>Nodejs version 4 or above , npm and Redis must be installed on the computer</p>
@@ -37,9 +39,19 @@ Nodejs/Express based Redis monitor
   <li>GET: /api/redis/flushall</li>
   <li>POST: /api/add</li>
   <li>POST: /api/del</li>
-</ol>  
+</ol>
 
 <h2>Screenshots</h2>
 <img src="docs/a.jpg">
-<hr >
 
+<hr >
+<img src="docs/b.jpg">
+<hr >
+<img src="docs/c.jpg">
+<hr >
+<img src="docs/d.jpg">
+<hr >
+<img src="docs/e.jpg">
+<hr >
+<img src="docs/f.jpg">
+<hr >
