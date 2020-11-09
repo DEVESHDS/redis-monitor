@@ -184,7 +184,7 @@ app.get("/api/redis/flushall", async (req, res) => {
   }
 });
 
-app.listen(1234, () => {
+app.listen(process.env.PORT || 1234, () => {
   console.log("App is listening");
   init();
 });
